@@ -61,7 +61,7 @@ function renderTasks() {
         }
     });
 
-    const dragables = document.querySelectorAll(".card")
+    let dragables = document.querySelectorAll(".card")
     
     dragables.forEach(card => {
         card.addEventListener("dragstart", function() {
@@ -72,7 +72,7 @@ function renderTasks() {
             this.classList.remove("dragging");
         })
     
-    const zones = document.querySelectorAll(".column")
+    let zones = document.querySelectorAll(".column")
     zones.forEach (column => {
         column.addEventListener("dragover", function(){
             const draggedElement = document.querySelectorAll(".card")
