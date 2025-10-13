@@ -39,8 +39,8 @@ h2{
     box-shadow: 5px 5px 5px 1px rgb(128, 128, 128, 0.2);
     margin: 20px;
     border-radius: 5px;
+    }
 
-}
 
 #taskCreation{
     display: flex;
@@ -57,6 +57,16 @@ h2{
     padding: 10px;
     flex: 1;
 
+}
+
+.beingDragged {
+ color: white;
+  background-color: black;
+}
+
+.hoverOver {
+  transition: 0.3s ease-out;
+  border: solid 5px #2a9d8f;
 }
 
 

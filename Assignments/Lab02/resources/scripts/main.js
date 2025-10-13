@@ -43,15 +43,8 @@ function renderTasks() {
             c.removeChild(c.lastChild);
         }
     });
-    
-
-    const zones = document.getElementById('inprogress-column');
-    zones.addEventListener('dragover', (c) => c.preventDefault());{}
-    zones.addEventListener('drop', (c) => {
-        const card = document.querySelector('.dragging');
-        c.target.appendChild(card);
-        card.classList.remove('dragging');
-    });
+ 
+    };
 
     tasks.forEach(t => {
         const taskDiv = document.createElement('div');
@@ -67,25 +60,41 @@ function renderTasks() {
             done.appendChild(taskDiv);
         }
     });
-}
 
-const addTaskButton = document.getElementById('addTask');
+    const dragables = document.querySelectorAll(".card")
+    
+    dragables.forEach(card => {
+        card.addEventListener("dragstart", function() {
+            this.classList.add("dragging")
+        })
+    
+        card.addEventListener("dragend", function(){
+            this.classList.remove("dragging");
+        })
+    
+    const zones = document.querySelectorAll(".column")
+    zones.forEach (column => {
+        column.addEventListener("dragover", function(){
+            const draggedElement = document.querySelectorAll(".card")
+            this.appendChild(draggedElement);
+            })
+        })
+    })
 
-addTaskButton.addEventListener('click', () => {
+    const addTaskButton = document.getElementById('addTask');
+
+    addTaskButton.addEventListener('click', () => {
     const input = document.getElementById('inputTask');
 
     const t = new Task(Date.now(), input.value, 'todo');
     tasks.push(t);
-    //fromJSON(input.value);
-    
+        
     input.value = '';
 
     localStorage.setItem('tasks', toJSON(tasks));
     renderTasks();
+
+
 });
 
-
-console.log(toJSON(tasks));
-
 loadTasks();
-renderTasks();
