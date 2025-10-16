@@ -7,9 +7,13 @@ import { Task         } from './Task.js';
 const canvas = document.getElementById('displayed-canvas');
 const drawer = new CanvasDrawer(canvas);
 
-const todo = document.getElementById('todo-column');
-const inprogress = document.getElementById('inprogress-column');
-const done = document.getElementById('done-column');
+let todo = document.getElementById('todo-column');
+let inprogress = document.getElementById('inprogress-column');
+let done = document.getElementById('done-column');
+let cards = document.querySelectorAll('.card');
+let dropzones = document.querySelectorAll('.dropzone');
+
+let selected = null;
 
 let tasks =[
     new Task (1, 'Learn about ES Modules','todo'),
@@ -26,9 +30,6 @@ function loadTasks() {
     }
 }
 
-loadTasks();
-renderTasks();
-
 function toJSON(json) {
     return JSON.stringify(json);
 }
@@ -43,8 +44,6 @@ function renderTasks() {
             c.removeChild(c.lastChild);
         }
     });
- 
-    };
 
     tasks.forEach(t => {
         const taskDiv = document.createElement('div');
@@ -52,7 +51,7 @@ function renderTasks() {
         taskDiv.draggable = true;
         taskDiv.textContent = t.text;
 
-        if(t.status === 'todo') {
+        if(t.status == 'todo') {
             todo.appendChild(taskDiv);
         } else if (t.status == 'inprogress') {
             inprogress.appendChild(taskDiv);
@@ -60,26 +59,77 @@ function renderTasks() {
             done.appendChild(taskDiv);
         }
     });
+ 
+}
 
-    let dragables = document.querySelectorAll(".card")
-    
-    dragables.forEach(card => {
-        card.addEventListener("dragstart", function() {
-            this.classList.add("dragging")
+
+/* for (list of cards){
+
+    list.addEventListener("dragstart",function(e){
+        let selected = e.target;
+
+        inprogress.addEventListener("dragover",function(e){
+            e.preventDefault();
+        });
+        inprogress.addEventListener("drop", function(e){
+            inprogress.appendChild(selected);
+            selected = null;                       
         })
-    
-        card.addEventListener("dragend", function(){
-            this.classList.remove("dragging");
+        todo.addEventListener("dragover",function(e){
+            e.preventDefault();
+        });
+        todo.addEventListener("drop", function(e){
+            todo.appendChild(selected);
+            selected = null;                       
         })
-    
-    let zones = document.querySelectorAll(".column")
-    zones.forEach (column => {
-        column.addEventListener("dragover", function(){
-            const draggedElement = document.querySelectorAll(".card")
-            this.appendChild(draggedElement);
-            })
+        done.addEventListener("dragover",function(e){
+            e.preventDefault();
+        });
+        done.addEventListener("drop", function(e){
+            done.appendChild(selected);
+            selected = null;                       
         })
-    })
+    })       
+}  */
+
+    
+// Add dragstart listener to each card
+    cards.forEach(card => {
+        card.addEventListener("dragstart", function(e) {
+            selected = e.target;
+        });
+    });
+
+    // Common dragover handler
+    function handleDragOver(e) {
+        e.preventDefault();
+    }
+
+    // Common drop handler
+    function handleDrop(e) {
+        e.preventDefault();
+        if (selected) {
+            e.target.appendChild(selected);
+            selected = null;
+        }
+    }
+
+    // Add listeners to drop zones
+    
+// Set up dragover and drop on each dropzone
+    dropzones.forEach(zone => {
+        zone.addEventListener("dragover", function (e) {
+        e.preventDefault(); // Necessary to allow dropping
+        });
+
+        zone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        if (selected) {
+            zone.appendChild(selected);
+            selected = null;
+        }
+    });
+});
 
     const addTaskButton = document.getElementById('addTask');
 
@@ -98,3 +148,4 @@ function renderTasks() {
 });
 
 loadTasks();
+renderTasks();
