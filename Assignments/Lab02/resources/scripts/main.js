@@ -1,151 +1,101 @@
 import { CanvasDrawer } from './CanvasDrawer.js';
-import { Task         } from './Task.js';
-//import { loadTasks    } from './Task.js';
-//import { saveTasks    } from './Task.js';
-//import { renderTasks  } from './Task.js';   
+import { Task } from './Task.js';
 
 const canvas = document.getElementById('displayed-canvas');
 const drawer = new CanvasDrawer(canvas);
 
-let todo = document.getElementById('todo-column');
-let inprogress = document.getElementById('inprogress-column');
-let done = document.getElementById('done-column');
-let cards = document.querySelectorAll('.card');
-let dropzones = document.querySelectorAll('.dropzone');
+const todo = document.getElementById('todo-column');
+const inprogress = document.getElementById('inprogress-column');
+const done = document.getElementById('done-column');
+const dropzones = document.querySelectorAll('.dropzone');
 
-let selected = null;
-
-let tasks =[
-    new Task (1, 'Learn about ES Modules','todo'),
-    new Task (2, 'Style the Kanban board', 'inprogress'),
-    new Task (3, 'Implement drag and drop', 'done'),
+let tasks = [
+  new Task(1, 'Learn about ES Modules', 'todo'),
+  new Task(2, 'Style the Kanban board', 'inprogress'),
+  new Task(3, 'Implement drag and drop', 'done'),
 ];
 
+// ---- LocalStorage helpers ----
+
+function saveTasks() {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
 function loadTasks() {
-    const saved = localStorage.getItem('tasks');
-
-    if(saved) {
-        const tasksTemp = JSON.parse(saved);
-        tasks = tasksTemp.map(t => new Task(t.id, t.text, t.status, t.location));
-    }
+  const saved = localStorage.getItem('tasks');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    tasks = parsed.map(t => new Task(t.id, t.text, t.status));
+  }
 }
 
-function toJSON(json) {
-    return JSON.stringify(json);
-}
-
-function fromJSON(json) {
-    const arr = JSON.parse(json);
-}
+// ---- Render tasks on the board ----
 
 function renderTasks() {
-    [todo, inprogress, done].forEach(c => {
-        while(c.children.length > 1) {
-            c.removeChild(c.lastChild);
-        }
+  [todo, inprogress, done].forEach(col => {
+    while (col.children.length > 1) col.removeChild(col.lastChild);
+  });
+
+  tasks.forEach(t => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.draggable = true;
+    card.textContent = t.text;
+    card.dataset.id = t.id;
+
+    // attach dragstart event
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', t.id);
+      console.log(`Dragging task ${t.id}: ${t.text}`);
     });
 
-    tasks.forEach(t => {
-        const taskDiv = document.createElement('div');
-        taskDiv.classList.add('card');
-        taskDiv.draggable = true;
-        taskDiv.textContent = t.text;
-
-        if(t.status == 'todo') {
-            todo.appendChild(taskDiv);
-        } else if (t.status == 'inprogress') {
-            inprogress.appendChild(taskDiv);
-        } else if ( t.status == 'done') {
-            done.appendChild(taskDiv);
-        }
-    });
- 
+    if (t.status === 'todo') todo.appendChild(card);
+    else if (t.status === 'inprogress') inprogress.appendChild(card);
+    else if (t.status === 'done') done.appendChild(card);
+  });
 }
 
+// ---- Handle dropping ----
 
-/* for (list of cards){
+function handleDrop(e) {
+  e.preventDefault();
+  const id = e.dataTransfer.getData('text/plain');
+  const task = tasks.find(t => t.id == id);
+  const column = e.currentTarget;
 
-    list.addEventListener("dragstart",function(e){
-        let selected = e.target;
+  if (task) {
+    if (column.id === 'todo-column') task.status = 'todo';
+    else if (column.id === 'inprogress-column') task.status = 'inprogress';
+    else if (column.id === 'done-column') task.status = 'done';
+  }
 
-        inprogress.addEventListener("dragover",function(e){
-            e.preventDefault();
-        });
-        inprogress.addEventListener("drop", function(e){
-            inprogress.appendChild(selected);
-            selected = null;                       
-        })
-        todo.addEventListener("dragover",function(e){
-            e.preventDefault();
-        });
-        todo.addEventListener("drop", function(e){
-            todo.appendChild(selected);
-            selected = null;                       
-        })
-        done.addEventListener("dragover",function(e){
-            e.preventDefault();
-        });
-        done.addEventListener("drop", function(e){
-            done.appendChild(selected);
-            selected = null;                       
-        })
-    })       
-}  */
+  saveTasks();
+  renderTasks();
+}
 
-    
-// Add dragstart listener to each card
-    cards.forEach(card => {
-        card.addEventListener("dragstart", function(e) {
-            selected = e.target;
-        });
-    });
+// ---- Set up drop zones ----
 
-    // Common dragover handler
-    function handleDragOver(e) {
-        e.preventDefault();
-    }
-
-    // Common drop handler
-    function handleDrop(e) {
-        e.preventDefault();
-        if (selected) {
-            e.target.appendChild(selected);
-            selected = null;
-        }
-    }
-
-    // Add listeners to drop zones
-    
-// Set up dragover and drop on each dropzone
-    dropzones.forEach(zone => {
-        zone.addEventListener("dragover", function (e) {
-        e.preventDefault(); // Necessary to allow dropping
-        });
-
-        zone.addEventListener("drop", function (e) {
-        e.preventDefault();
-        if (selected) {
-            zone.appendChild(selected);
-            selected = null;
-        }
-    });
+dropzones.forEach(zone => {
+  zone.addEventListener('dragover', e => e.preventDefault());
+  zone.addEventListener('drop', handleDrop);
 });
 
-    const addTaskButton = document.getElementById('addTask');
+// ---- Add new tasks ----
 
-    addTaskButton.addEventListener('click', () => {
-    const input = document.getElementById('inputTask');
+const addTaskButton = document.getElementById('addTask');
 
-    const t = new Task(Date.now(), input.value, 'todo');
-    tasks.push(t);
-        
-    input.value = '';
+addTaskButton.addEventListener('click', () => {
+  const input = document.getElementById('inputTask');
+  if (!input.value.trim()) return;
 
-    localStorage.setItem('tasks', toJSON(tasks));
-    renderTasks();
+  const newTask = new Task(Date.now(), input.value, 'todo');
+  tasks.push(newTask);
+  input.value = '';
 
-
+  saveTasks();
+  renderTasks();
 });
 
+// ---- Initial load ----
 loadTasks();
 renderTasks();
