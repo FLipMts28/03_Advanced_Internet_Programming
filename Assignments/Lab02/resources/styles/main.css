@@ -1,6 +1,13 @@
 #displayed-canvas {
-    border: 1px solid black;
+    border: 2px dashed #ccc;
+    padding: 5px;
+    height: 400px;
+    display: flex;
+    flex-direction: row;
+    margin: 20px;
+    cursor: crosshair;
 }
+
 
 .dropzone {
     margin: 20px 10px 10px 20px;
@@ -8,6 +15,14 @@
     flex: 1;
     background-color: whitesmoke;
     border-radius: 10px;
+    transition: background-color 0.2s;
+
+}
+
+
+.dropzone.drag-over {
+  background-color: #e0f7fa;
+  border-color: #00796b;
 }
 
 h2{
@@ -15,6 +30,7 @@ h2{
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bolder;
     padding: 5px;
+    font-size: medium;
 
 }
 
